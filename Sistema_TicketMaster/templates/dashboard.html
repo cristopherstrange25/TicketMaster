@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.7);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-top: 50px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .option {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .option img {
+            width: 80%;
+            height: 80%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .option:hover {
+            transform: scale(1.1);
+        }
+
+        .option figcaption {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00796b;
+        }
+
+        .links {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .links a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #00796b;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+        }
+
+        .links a:hover {
+            color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido a TICKET-MASTER</h1>
+
+    <div class="container">
+        <div class="option">
+            <a href="{{ url_for('cine') }}">
+                <img src="{{ url_for('static', filename='recursos/cine.jpeg') }}" alt="Cine">
+            </a>
+            <figcaption>Cine</figcaption>
+        </div>
+        <div class="option">
+            <a href="{{ url_for('teatro') }}">
+                <img src="{{ url_for('static', filename='recursos/teatro.jpeg') }}" alt="Teatro">
+            </a>
+            <figcaption>Teatro</figcaption>
+        </div>
+        <div class="option">
+            <a href="{{ url_for('museo') }}">
+                <img src="{{ url_for('static', filename='recursos/museo.jpeg') }}" alt="Museo">
+            </a>
+            <figcaption>Museo</figcaption>
+        </div>
+    </div>
+
+    <div class="links">
+        <a href="{{ url_for('logout') }}">Salir</a>
+    </div>
+</body>
+</html>

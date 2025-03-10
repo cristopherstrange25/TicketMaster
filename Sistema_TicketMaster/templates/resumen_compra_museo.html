@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Compra - Museo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00796b;
+            font-size: 2em;
+        }
+
+        h3 {
+            color: #00796b;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #333333;
+            margin: 10px 0;
+        }
+
+        strong {
+            color: #00796b;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #00796b;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+        }
+
+        .back-link:hover {
+            background-color: #00796b;
+        }
+
+        .summary-section {
+            margin-bottom: 20px;
+        }
+
+        .summary-section p {
+            background-color: #e0f2f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-section p:nth-child(odd) {
+            background-color: #b2dfdb;
+        }
+        .restrictions {
+            margin-top: 20px;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <div id="ticket-data" 
+    data-museo="{{ ticket.museo }}"
+    data-fecha="{{ ticket.fecha }}"
+    data-horario="{{ ticket.horario }}"
+    data-cantidad_boletos="{{ ticket.cantidad_boletos }}"
+    data-metodo_pago="{{ ticket.metodo_pago }}"
+    data-nombre_pago="{{ ticket.nombre_pago }}"
+    data-numero_tarjeta="{{ ticket.numero_tarjeta }}">
+</div>
+ <!-- jsPDF Script -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Resumen de tu Compra - Museo</h1>
+
+        <div class="summary-section">
+            <h3>Detalles del Ticket</h3>
+            <p><strong>Museo:</strong> {{ ticket.museo }}</p>
+            <p><strong>Fecha:</strong> {{ ticket.fecha }}</p>
+            <p><strong>Horario:</strong> {{ ticket.horario }}</p>
+            <p><strong>Cantidad de boletos:</strong> {{ ticket.cantidad_boletos }}</p>
+            <p><strong>Método de pago:</strong> {{ ticket.metodo_pago }}</p>
+            <p><strong>Nombre del titular de la tarjeta:</strong> {{ ticket.nombre_pago }}</p>
+            {% if ticket.numero_tarjeta %}
+            <p><strong>Tarjeta o correo:</strong> {{ ticket.numero_tarjeta }}</p>
+            {% endif %}
+        </div>
+        <div class="summary-section">
+            <h3>Pago Final</h3>
+            <p><strong>Total:</strong> $<span id="total"></span></p>
+        </div>
+        <div class="restrictions">
+            <h3>Restricciones:</h3>
+            <p>No se permite la entrada con mochilas grandes ni cámaras profesionales.</p>
+            <p>No se permite la entrada con alimentos o bebidas.</p>
+            <p>Los visitantes deben vestir ropa apropiada (no se permite ropa corta o escotada).</p>
+        </div>
+
+        <a href="{{ url_for('dashboard') }}" class="back-link">Regresar al Dashboard</a>
+        <a href="javascript:generarPDFyCompartir();" 
+        class="back-link"
+        id="whatsapp-button">
+         Enviar por WhatsApp
+     </a>    </div>
+
+</body>
+<script>
+    // Calcular total del ticket
+    function calcularTotal() {
+        const ticketData = document.getElementById('ticket-data').dataset;
+        
+        const precio = 50; // Extrae el precio de la sección (ej. "Standard_100")
+
+        // Calcular el total
+        const total = precio * ticketData.cantidad_boletos;
+
+        // Mostrar el total en el HTML
+        document.getElementById('total').textContent = total;
+    }
+
+    function generarPDFyCompartir() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const ticket = document.getElementById('ticket-data').dataset;
+        // Obtener el total (asegúrate de tenerlo en una variable o calcularlo)
+        const total = document.getElementById('total').innerText || "No disponible";
+
+        // Construir contenido del PDF
+        doc.text("Resumen de Compra Museo", 20, 20);
+        doc.text(`Museo: ${ticket.museo}`, 20, 30);
+        doc.text(`Fecha: ${ticket.fecha}`, 20, 40);
+        doc.text(`Horario: ${ticket.horario}`, 20, 50);
+        doc.text(`Cantidad de boletos: ${ticket.cantidad_boletos}`, 20, 60);
+        doc.text(`Método de pago: ${ticket.metodo_pago}`, 20, 70);
+        doc.text(`Titular: ${ticket.nombre_pago}`, 20, 80);
+        if (ticket.numero_tarjeta) {
+            doc.text(`Tarjeta/Correo: ${ticket.numero_tarjeta}`, 20, 90);
+        }
+        // Incluir el Total en el PDF
+        doc.text(`Total: $${total}`, 20, 110);
+
+        // Leyenda de Restricciones
+        doc.text("Restricciones:", 20, 120);
+        doc.text("No se permite la entrada con mochilas grandes ni cámaras profesionales.", 20, 130);
+        doc.text("No se permite la entrada con alimentos o bebidas.", 20, 140);
+        doc.text("Los visitantes deben vestir ropa apropiada:", 20, 150);
+        doc.text("(no se permite ropa corta o escotada).", 20, 160);
+        // Generar Blob del PDF
+        const pdfBlob = doc.output('blob');
+        const pdfFile = new File([pdfBlob], 'ResumenCompraMuseo.pdf', { type: 'application/pdf' });
+
+        // Texto para compartir
+        const mensaje = `Resumen de Compra Museo:\nMuseo: ${ticket.museo}\nFecha: ${ticket.fecha}\nHorario: ${ticket.horario}`;
+
+        // Intentar compartir con API Web
+        if (navigator.share) {
+            navigator.share({
+                title: 'Resumen de Compra Museo',
+                text: mensaje,
+                files: [pdfFile]
+            }).catch(console.error);
+        } else {
+            // Fallback para escritorio: descarga el PDF y comparte el mensaje en WhatsApp Web
+            doc.save('ResumenCompraMuseo.pdf');
+
+            // Crear el enlace para compartir en WhatsApp
+            const urlWhatsApp = `https://web.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+
+            // Abrir el enlace de WhatsApp
+            window.open(urlWhatsApp, '_blank');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        calcularTotal();
+    });
+</script>
+
+</html>

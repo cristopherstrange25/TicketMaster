@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compra de Boletos - Museo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #00796b;
+        }
+        label {
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .restrictions {
+            margin: 15px 0;
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .submit-btn {
+            background-color: #00796b;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Compra de Boletos Museo</h1>
+    <p class="price-info">Precio por boleto a público general: $50</p>
+    <form action="/procesar-compra3" method="post">
+
+        <!-- Selección de Museo -->
+        <div class="form-section">
+            <label for="museo">Seleccione el museo:</label>
+            <select id="museo" name="museo" required>
+                <option value="" disabled selected>Elige una opción</option>
+                <option value="Museo de Louvre, París">Museo de Louvre, París</option>
+                <option value="Museo Metropolitano de Nueva York">Museo Metropolitano de Nueva York</option>
+                <option value="Museo Vaticano">Museo Vaticano</option>
+                <option value="Museo Nacional de Antropología, Ciudad de México">Museo Nacional de Antropología, Ciudad de México</option>
+                <option value="Museu Nacional d'Art de Catalunya">Museu Nacional d'Art de Catalunya</option>
+            </select>
+        </div>
+
+        <!-- Selección de Fecha -->
+        <div class="form-section">
+            <label for="fecha">Selecciona la fecha (dd/mm/aaaa):</label>
+            <input type="date" id="fecha" name="fecha" required>
+        </div>
+
+        <!-- Selección de Horario -->
+        <div class="form-section">
+            <label for="horario">Seleccione el horario de entrada:</label>
+            <select id="horario" name="horario" required>
+                <option value="" disabled selected>Elige una opción</option>
+                <option value="09:00 - 12:00">09:00 - 12:00</option>
+                <option value="13:00 - 16:00">13:00 - 16:00</option>
+                <option value="17:00 - 20:00">17:00 - 20:00</option>
+            </select>
+        </div>
+
+        <!-- Cantidad de Boletos -->
+        <div class="form-section">
+            <label for="cantidad">Cantidad de boletos (máximo 5):</label>
+            <input type="number" id="cantidad" name="cantidad" min="1" max="5" required>
+        </div>
+
+        <!-- Método de Pago -->
+        <div class="form-section">
+            <label for="metodoPago">Elige el método de pago:</label>
+            <select id="metodoPago" name="metodoPago" required>
+                <option value="" disabled selected>Elige una opción</option>
+                <option value="Tarjeta de débito">Tarjeta de débito</option>
+                <option value="Tarjeta de crédito">Tarjeta de crédito</option>
+                <option value="PayPal">PayPal</option>
+            </select>
+        </div>
+
+        <!-- Datos de Pago -->
+        <div class="form-section" id="datosPago">
+            <label for="numeroTarjeta">Número de tarjeta:</label>
+            <input type="text" id="numeroTarjeta" name="numeroTarjeta" required pattern="\d{12}" title="El número de tarjeta debe tener 12 dígitos.">
+
+            <label for="nombrePago">Nombre del titular:</label>
+            <input type="text" id="nombrePago" name="nombrePago" required>
+        </div>
+
+        <!-- Restricciones -->
+        <div class="restrictions">
+            <strong>Restricciones:</strong>
+            <ul id="restriccionesLista">
+                <li>No se permite la entrada con mochilas grandes ni cámaras profesionales.</li>
+                <li>No se permite la entrada con alimentos o bebidas.</li>
+                <li>Los visitantes deben vestir ropa apropiada (no se permite ropa corta o escotada).</li>
+            </ul>
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" class="submit-btn">Realizar Compra</button>
+    </form>
+</div>
+<script>
+    // Validación de fecha
+    const fechaInput = document.getElementById('fecha');
+    const today = new Date().toISOString().split('T')[0];
+    fechaInput.min = today;
+    fechaInput.max = '2099-12-31';
+
+    // Validación de método de pago
+    const metodoPago = document.getElementById('metodoPago');
+    const numeroTarjeta = document.getElementById('numeroTarjeta');
+    const labelTarjeta = document.querySelector('label[for="numeroTarjeta"]');
+
+    function actualizarValidacionPago() {
+        if (metodoPago.value === 'PayPal') {
+            // Configuración para PayPal
+            numeroTarjeta.type = 'email';
+            numeroTarjeta.placeholder = 'ejemplo@correo.com';
+            numeroTarjeta.removeAttribute('pattern');
+            numeroTarjeta.setAttribute('title', 'Ingrese un correo electrónico válido (ej. usuario@dominio.com)');
+            labelTarjeta.textContent = 'Correo de PayPal:';
+            
+            // Agregar validación personalizada para email
+            numeroTarjeta.addEventListener('input', function() {
+                this.setCustomValidity('');
+                if (!this.validity.valid) {
+                    this.setCustomValidity('Por favor ingrese un numero de tarjeta');
+                }
+            });
+        } else {
+            // Configuración para tarjetas
+            numeroTarjeta.type = 'text';
+            numeroTarjeta.placeholder = '123456789012';
+            numeroTarjeta.setAttribute('pattern', '\\d{12}');
+            numeroTarjeta.setAttribute('title', 'Debe contener exactamente 12 dígitos numéricos');
+            labelTarjeta.textContent = 'Número de tarjeta:';
+            
+            // Remover validación personalizada de email
+            numeroTarjeta.removeEventListener('input', arguments.callee);
+        }
+    }
+
+    // Ejecutar al cambiar y al cargar la página
+    metodoPago.addEventListener('change', actualizarValidacionPago);
+    window.addEventListener('load', actualizarValidacionPago);
+</script>
+</body>
+</html>
