@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compra de Boletos para el Teatro</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Fuente similar a la que mencionaste */
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #00796b; /* Verde más oscuro */
+            font-size: 30px; /* Tamaño de letra más grande */
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 16px;
+            color: #333;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #00796b;
+            box-sizing: border-box;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-header {
+            background-color: #2C9F45; /* El mismo color verde */
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .submit-btn {
+            background-color: #00796b;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: #248f3d; /* Un verde más oscuro al pasar el ratón */
+        }
+        .restrictions {
+            margin: 15px 0;
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .form-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Compra de Boletos para el Teatro</h1>
+
+        <form action="/procesar-compra2" method="post">
+            <div class="form-section">
+                <label for="teatro">Elige un teatro:</label>
+                <select id="teatro" name="teatro" required>
+                    <option value="" disabled selected>Elige una opción</option>
+                    <option value="Teatro Colón, Buenos Aires - Capacidad: 2500 personas">Teatro Colón, Buenos Aires - Capacidad: 2500 personas</option>
+                    <option value="Teatro de la Scala, Milán - Capacidad: 2800 personas">Teatro de la Scala, Milán - Capacidad: 2800 personas</option>
+                    <option value="Teatro Metropolitán, Ciudad de México - Capacidad: 8000 personas">Teatro Metropolitán, Ciudad de México - Capacidad: 8000 personas</option>
+                </select>
+                
+            </div>
+
+            <div class="form-group">
+                <label for="fecha">Ingresa la fecha de la función:</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="form-section">
+                <label for="obra">Selecciona una obra:</label>
+                <select id="obra" name="obra" required>
+                    <option value="" disabled selected>Elige una opción</option>
+                    <option value="El rey León">El rey León</option>
+                    <option value="Frankenstein">Frankenstein</option>
+                    <option value="Romeo y Julieta">Romeo y Julieta</option>
+                </select>
+                
+            </div>
+
+            <div class="form-section">
+                <label for="horario">Selecciona un horario:</label>
+                <select id="horario" name="horario" required>
+                    <option value="" disabled selected>Elige una opción</option>
+                    <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+                    <option value="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</option>
+                    <option value="5:00 PM - 6:00 PM">5:00 PM - 6:00 PM</option>
+                </select>
+                
+            </div>
+
+            <div class="form-section">
+                <label for="seccion">Selecciona la sección:</label>
+                <select id="seccion" name="seccion" required>
+                    <option value="" disabled selected>Elige una opción</option>
+                    <option value="Luneta_500">Luneta - $500</option>
+                    <option value="Palco_800">Palco - $800</option>
+                    <option value="Galería_300">Galería - $300</option>
+                </select>
+                
+            </div>
+
+            <div class="form-section">
+                <label for="cantidad">Cantidad de boletos (máximo 10):</label>
+                <input type="number" id="cantidad" name="cantidad" min="1" max="10" required>
+            </div>
+
+            <!-- Método de Pago -->
+        <div class="form-section">
+            <label for="metodoPago">Elige el método de pago:</label>
+            <select id="metodoPago" name="metodoPago" required>
+                <option value="" disabled selected>Elige una opción</option>
+                <option value="Tarjeta de débito">Tarjeta de débito</option>
+                <option value="Tarjeta de crédito">Tarjeta de crédito</option>
+                <option value="PayPal">PayPal</option>
+            </select>
+        </div>
+
+        <!-- Datos de Pago -->
+        <div class="form-section" id="datosPago">
+            <label for="numeroTarjeta">Número de tarjeta:</label>
+            <input type="text" id="numeroTarjeta" name="numeroTarjeta" title="El número de tarjeta debe tener 12 dígitos.">
+
+            <label for="nombrePago">Nombre del titular:</label>
+            <input type="text" id="nombrePago" name="nombrePago" required>
+        </div>
+
+        <div class="restrictions">
+            <h3>Restricciones:</h3>
+            <p>No se permite la entrada con mascotas o alimentos.</p>
+            <p>No se permite la entrada con ningún tipo de arma.</p>
+            <p>Evite hacer ruido.</p>
+        </div>
+            
+            <input type="submit" value="Realizar Pago" class="submit-btn">
+        </form>
+    </div>
+
+    <script>
+        // Validación de fecha
+        const fechaInput = document.getElementById('fecha');
+        const today = new Date().toISOString().split('T')[0];
+        fechaInput.min = today;
+        fechaInput.max = '2099-12-31';
+    
+        // Validación de método de pago
+        const metodoPago = document.getElementById('metodoPago');
+        const numeroTarjeta = document.getElementById('numeroTarjeta');
+        const labelTarjeta = document.querySelector('label[for="numeroTarjeta"]');
+    
+        function actualizarValidacionPago() {
+            if (metodoPago.value === 'PayPal') {
+                // Configuración para PayPal
+                numeroTarjeta.type = 'email';
+                numeroTarjeta.placeholder = 'ejemplo@correo.com';
+                numeroTarjeta.removeAttribute('pattern');
+                numeroTarjeta.setAttribute('title', 'Ingrese un correo electrónico válido (ej. usuario@dominio.com)');
+                labelTarjeta.textContent = 'Correo de PayPal:';
+                
+                // Agregar validación personalizada para email
+                numeroTarjeta.addEventListener('input', function() {
+                    this.setCustomValidity('');
+                    if (!this.validity.valid) {
+                        this.setCustomValidity('Por favor ingrese un numero de tarjeta');
+                    }
+                });
+            } else {
+                // Configuración para tarjetas
+                numeroTarjeta.type = 'text';
+                numeroTarjeta.placeholder = '123456789012';
+                numeroTarjeta.setAttribute('pattern', '\\d{12}');
+                numeroTarjeta.setAttribute('title', 'Debe contener exactamente 12 dígitos numéricos');
+                labelTarjeta.textContent = 'Número de tarjeta:';
+                
+                // Remover validación personalizada de email
+                numeroTarjeta.removeEventListener('input', arguments.callee);
+            }
+        }
+    
+        // Ejecutar al cambiar y al cargar la página
+        metodoPago.addEventListener('change', actualizarValidacionPago);
+        window.addEventListener('load', actualizarValidacionPago);
+    </script>
+</body>
+</html>
