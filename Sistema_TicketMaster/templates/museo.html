@@ -135,48 +135,63 @@
 </div>
 <script>
     // Validación de fecha
-    const fechaInput = document.getElementById('fecha');
-    const today = new Date().toISOString().split('T')[0];
-    fechaInput.min = today;
-    fechaInput.max = '2099-12-31';
+    document.addEventListener("DOMContentLoaded", function () {
+        const fechaInput = document.getElementById('fecha');
+        const today = new Date().toISOString().split('T')[0];
+        fechaInput.min = today;
+        fechaInput.max = '2099-12-31';
 
-    // Validación de método de pago
-    const metodoPago = document.getElementById('metodoPago');
-    const numeroTarjeta = document.getElementById('numeroTarjeta');
-    const labelTarjeta = document.querySelector('label[for="numeroTarjeta"]');
+        // Validación de método de pago
+        const metodoPago = document.getElementById('metodoPago');
+        const numeroTarjeta = document.getElementById('numeroTarjeta');
+        const labelTarjeta = document.querySelector('label[for="numeroTarjeta"]');
 
-    function actualizarValidacionPago() {
-        if (metodoPago.value === 'PayPal') {
-            // Configuración para PayPal
-            numeroTarjeta.type = 'email';
-            numeroTarjeta.placeholder = 'ejemplo@correo.com';
-            numeroTarjeta.removeAttribute('pattern');
-            numeroTarjeta.setAttribute('title', 'Ingrese un correo electrónico válido (ej. usuario@dominio.com)');
-            labelTarjeta.textContent = 'Correo de PayPal:';
-            
-            // Agregar validación personalizada para email
-            numeroTarjeta.addEventListener('input', function() {
-                this.setCustomValidity('');
-                if (!this.validity.valid) {
-                    this.setCustomValidity('Por favor ingrese un numero de tarjeta');
-                }
-            });
-        } else {
-            // Configuración para tarjetas
-            numeroTarjeta.type = 'text';
-            numeroTarjeta.placeholder = '123456789012';
-            numeroTarjeta.setAttribute('pattern', '\\d{12}');
-            numeroTarjeta.setAttribute('title', 'Debe contener exactamente 12 dígitos numéricos');
-            labelTarjeta.textContent = 'Número de tarjeta:';
-            
-            // Remover validación personalizada de email
-            numeroTarjeta.removeEventListener('input', arguments.callee);
+        function actualizarValidacionPago() {
+            // Eliminar cualquier validación previa
+            numeroTarjeta.setCustomValidity('');
+
+            if (metodoPago.value === 'PayPal') {
+                // Configuración para PayPal
+                numeroTarjeta.type = 'email';
+                numeroTarjeta.placeholder = 'ejemplo@correo.com';
+                numeroTarjeta.removeAttribute('pattern');
+                numeroTarjeta.setAttribute('title', 'Ingrese un correo electrónico válido (ej. usuario@dominio.com)');
+                labelTarjeta.textContent = 'Correo de PayPal:';
+
+                numeroTarjeta.removeEventListener('input', validarTarjeta);
+                numeroTarjeta.addEventListener('input', validarCorreo);
+            } else {
+                // Configuración para tarjetas
+                numeroTarjeta.type = 'text';
+                numeroTarjeta.placeholder = '123456789012';
+                numeroTarjeta.setAttribute('pattern', '\\d{12}');
+                numeroTarjeta.setAttribute('title', 'Debe contener exactamente 12 dígitos numéricos');
+                labelTarjeta.textContent = 'Número de tarjeta:';
+
+                numeroTarjeta.removeEventListener('input', validarCorreo);
+                numeroTarjeta.addEventListener('input', validarTarjeta);
+            }
         }
-    }
 
-    // Ejecutar al cambiar y al cargar la página
-    metodoPago.addEventListener('change', actualizarValidacionPago);
-    window.addEventListener('load', actualizarValidacionPago);
+        function validarCorreo() {
+            this.setCustomValidity('');
+            if (!this.validity.valid) {
+                this.setCustomValidity("Ingrese un correo electrónico válido (ej. usuario@dominio.com)");
+            }
+        }
+
+        function validarTarjeta() {
+            this.setCustomValidity('');
+            if (!/^\d{12}$/.test(this.value)) {
+                this.setCustomValidity("Ingrese un número de tarjeta válido (12 dígitos numéricos)");
+            }
+        }
+
+        // Ejecutar al cambiar y al cargar la página
+        metodoPago.addEventListener('change', actualizarValidacionPago);
+        actualizarValidacionPago();
+    });
 </script>
+
 </body>
 </html>

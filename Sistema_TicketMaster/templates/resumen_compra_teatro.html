@@ -80,6 +80,46 @@
             padding: 10px;
             border-radius: 5px;
         }
+        .qr-container {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.qr-container img {
+    margin: 0 auto;
+    display: block;
+}
+
+.whatsapp-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 8px;
+}
+
+#phoneNumber {
+    padding: 10px;
+    margin-right: 10px;
+    width: 200px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.custom-text {
+            font-family: 'Arial', sans-serif; /* Tipo de fuente */
+            font-size: 15px; /* Tamaño de fuente */
+        }
+        .menu {    
+    display: flex;               /* Activar flexbox */
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    -ms-flex-item-align: center;
+    margin: 20px 0;
+    padding: 15px;
+}
     </style>
     <div id="ticket-data" 
     data-teatro="{{ ticket.teatro }}"
@@ -90,7 +130,8 @@
     data-cantidad_boletos="{{ ticket.cantidad_boletos }}"
     data-metodo_pago="{{ ticket.metodo_pago }}"
     data-nombre_pago="{{ ticket.nombre_pago }}"
-    data-numero_tarjeta="{{ ticket.numero_tarjeta }}">
+    data-numero_tarjeta="{{ ticket.numero_tarjeta }}"
+    data-qr_code="{{ ticket.qr_code_b64 | safe}}">
 </div>
  <!-- jsPDF Script -->
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -104,6 +145,14 @@
 
         <div class="summary-section">
             <h3>Detalles del Ticket</h3>
+            <!-- resumen_compra.html -->
+            <div class="qr-container">
+                {% if qr_code_b64 %}
+                    <img src="data:image/png;base64,{{ qr_code_b64 }}" alt="QR Teatro" 
+                    style="max-width: 200px;">
+                    <p>Escanea este código para validar tu entrada</p>
+                {% endif %}
+                </div>
             <p><strong>Teatro:</strong> {{ ticket.teatro }}</p>
             <p><strong>Fecha:</strong> {{ ticket.fecha }}</p>
             <p><strong>Obra:</strong> {{ ticket.obra }}</p>
@@ -111,7 +160,7 @@
             <p><strong>Sección:</strong> {{ ticket.seccion }}</p>
             <p><strong>Cantidad de boletos:</strong> {{ ticket.cantidad_boletos }}</p>
             <p><strong>Método de pago:</strong> {{ ticket.metodo_pago }}</p>
-            <p><strong>Nombre del titular de la tarjeta:</strong> {{ ticket.nombre_pago }}</p>
+            <p><strong>Nombre del titular:</strong> {{ ticket.nombre_pago }}</p>
             {% if ticket.numero_tarjeta %}
             <p><strong>Tarjeta o correo:</strong> {{ ticket.numero_tarjeta }}</p>
             {% endif %}
@@ -127,12 +176,18 @@
             <p>Evite hacer ruido.</p>
         </div>
 
-    <a href="{{ url_for('dashboard') }}" class="back-link">Regresar al Dashboard</a>
-    <a href="javascript:generarPDFyCompartir();" 
-    class="back-link"
-    id="whatsapp-button">
-     Enviar por WhatsApp
- </a>    </div>
+        <div class="whatsapp-container">
+            <p class="custom-text">Por favor, no olvide enviar su ticker por whatsapp...</p>
+            <input type="tel" id="phoneNumber" placeholder="+521234567890">
+            <!-- Cambia el botón para usar la función corregida -->
+            <button onclick="enviarPDFporWhatsApp()">Enviar PDF por WhatsApp</button>
+            <p></p>
+            
+        </div>
+        <div class="menu">
+            <a href="{{ url_for('dashboard') }}" class="back-link"  >Regresar al Dashboard</a>
+        </div>
+</div>
 
 </body>
 <script>
@@ -151,7 +206,7 @@
         document.getElementById('total').textContent = total;
     }
 
-    function generarPDFyCompartir() {
+    function generarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const ticket = document.getElementById('ticket-data').dataset;
@@ -160,18 +215,17 @@
         const total = document.getElementById('total').innerText || "No disponible";
 
         // Construir contenido del PDF
-        doc.text("Resumen de Compra", 20, 20);
-        doc.text(`Teatro: ${ticket.teatro}`, 20, 30);
-        doc.text(`Fecha: ${ticket.fecha}`, 20, 40);
-        doc.text(`Obra: ${ticket.obra}`, 20, 50);
-        doc.text(`Horario: ${ticket.horario}`, 20, 60);
-        doc.text(`Sección: ${ticket.seccion}`, 20, 70);
-        doc.text(`Boletos: ${ticket.cantidad_boletos}`, 20, 80);
-        doc.text(`Método Pago: ${ticket.metodo_pago}`, 20, 90);
-        doc.text(`Titular: ${ticket.nombre_pago}`, 20, 100);
-        if (ticket.numero_tarjeta) {
-            doc.text(`Tarjeta/Correo: ${ticket.numero_tarjeta}`, 20, 110);
-        }
+        doc.text("Resumen de Compra - Teatro", 20, 20);
+        doc.text(`Teatro: ${ticket.teatro}`, 20, 40);
+        doc.text(`Fecha: ${ticket.fecha}`, 20, 50);
+        doc.text(`Obra: ${ticket.obra}`, 20, 60);
+        doc.text(`Horario: ${ticket.horario}`, 20, 70);
+        doc.text(`Sección: ${ticket.seccion}`, 20, 80);
+        doc.text(`Boletos: ${ticket.cantidad_boletos}`, 20, 90);
+        doc.text(`Método Pago: ${ticket.metodo_pago}`, 20, 100);
+        doc.text(`Titular: ${ticket.nombre_pago}`, 20, 110);
+        doc.text(`Tarjeta/Correo: ${ticket.numero_tarjeta}`, 20, 120);
+        
 
         // Incluir el Total en el PDF
         doc.text(`Total: $${total}`, 20, 130);
@@ -182,31 +236,97 @@
         doc.text("No se permite la entrada con ningún tipo de arma.", 20, 160);
         doc.text("Evite hacer ruido.", 20, 170);
        
+        doc.text("No olvide escanear el codigo", 50, 180);
+        const qrDataUrl = "data:image/png;base64,{{ qr_code_b64 }}"
         // Generar Blob del PDF
-        const pdfBlob = doc.output('blob');
-        const pdfFile = new File([pdfBlob], 'ResumenCompraTeatro.pdf', { type: 'application/pdf' });
+        return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            doc.addImage(img, 'PNG', 80, 185, 50, 50);
+            resolve(doc.output('blob')); // Devuelve el PDF como Blob
+        };
+        img.onerror = (err) => {
+            console.error("Error al cargar la imagen QR", err);
+            reject("No se pudo cargar la imagen QR");
+        };
+        img.src = qrDataUrl;
+    });
 
-        // Texto para compartir
-        const mensaje = `Resumen de Compra Teatro:\nTeatro: ${ticket.teatro}\nObra: ${ticket.obra}\nFecha: ${ticket.fecha}\nHorario: ${ticket.horario}`;
-
-        // Intentar compartir con API Web
-        if (navigator.share) {
-            navigator.share({
-                title: 'Resumen de Compra Teatro',
-                text: mensaje,
-                files: [pdfFile]
-            }).catch(console.error);
-        } else {
-            // Fallback para escritorio: descarga el PDF y comparte el mensaje en WhatsApp Web
-            doc.save('ResumenCompraTeatro.pdf');
-
-            // Aquí creamos el enlace para WhatsApp
-            const urlWhatsApp = `https://web.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-
-            // Abre el enlace para compartir en WhatsApp Web
-            window.open(urlWhatsApp, '_blank');
-        }
+    // Retorna el blob del PDF generado
+    return doc.output('blob');
     }
+
+    async function uploadPDF(pdfBlob) {
+    const formData = new FormData();
+    formData.append('pdf', pdfBlob, 'ticket.pdf'); // Nombre explícito
+    
+    try {
+        const response = await fetch('/upload-pdf', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Error desconocido al subir PDF');
+        }
+        
+        return result.url;
+        
+    } catch (error) {
+        console.error('Error en uploadPDF:', error);
+        throw error;
+    }
+}
+
+
+async function enviarPDFporWhatsApp() {
+    const phoneNumber = document.getElementById('phoneNumber').value;
+
+    try {
+        // Validación de número
+        if (!/^\+521\d{10}$/.test(phoneNumber)) {
+            throw new Error('Formato inválido. Ejemplo: +5211234567890');}
+
+        // Generar y subir PDF
+        const pdfBlob = await generarPDF();
+        const pdfUrl = await uploadPDF(pdfBlob);
+
+        // Mostrar y abrir PDF
+        console.log('✅ PDF subido correctamente:', pdfUrl);
+        //alert('✅ PDF subido correctamente a Cloudinary:\n' + pdfUrl);
+        //window.open(pdfUrl, '_blank');
+
+        // Construir mensaje
+        const ticketData = document.getElementById('ticket-data').dataset;
+        const mensaje = `*Resumen de Compra* 🎟️\n\n` +
+                        `Hola. Buen dia, soy Tickerin y a continuación le hago llegar el ticket de la compra que realizó\n` + 
+                        `Sin más por el momento... Gracias\n` +
+                        `📄 Ticket PDF: ${pdfUrl}\n` ;
+
+        // Enviar vía Twilio
+        const response = await fetch('/enviar-whatsapp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                phone: phoneNumber,
+                message: mensaje,
+                
+            })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error);
+
+        alert('✅ Ticket enviado correctamente por WhatsApp');
+
+    } catch (error) {
+        console.error('Error completo:', error);
+        //alert(`❌ Error: ${error.message}`);
+        alert(`❌ Error: el número no existe en tu zona`);
+    }
+}
 
     document.addEventListener('DOMContentLoaded', function() {
         calcularTotal();

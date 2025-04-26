@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: white;
             margin: 0;
             padding: 0;
             display: flex;
@@ -118,6 +118,7 @@
 
         <div class="signup-link">
             <p>¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
+            <p>Olvidaste tu contraseña...  <a href="{{ url_for('recuperar') }}">Recuperar</a></p>
         </div>
     </div>
 

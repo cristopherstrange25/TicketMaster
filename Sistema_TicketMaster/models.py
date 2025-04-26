@@ -5,7 +5,7 @@ from flask_login import UserMixin  # Añadir UserMixin
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(500), nullable=False)
 
 
 class Event(db.Model):
@@ -40,6 +40,7 @@ class CineTicket(db.Model):
     nombre_pago = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     asientos = db.Column(db.String(255), nullable=False)  # Nueva columna para almacenar los asientos
+    qr_code = db.Column(db.LargeBinary, nullable=True) 
 
     user = db.relationship('User', backref=db.backref('cine_tickets', lazy=True))
 
@@ -60,6 +61,7 @@ class TeatroTicket(db.Model):
     numero_tarjeta = db.Column(db.String(50))  # ⚠️ No recomendado almacenar tarjetas
     nombre_pago = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    qr_code = db.Column(db.LargeBinary, nullable=True)
 
     user = db.relationship('User', backref=db.backref('teatro_tickets', lazy=True))
 
@@ -78,6 +80,7 @@ class MuseoTicket(db.Model):
     numero_tarjeta = db.Column(db.String(50))  # ⚠️ No recomendado almacenar tarjetas
     nombre_pago = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    qr_code = db.Column(db.LargeBinary, nullable=True)
 
     user = db.relationship('User', backref=db.backref('museo_tickets', lazy=True))
 

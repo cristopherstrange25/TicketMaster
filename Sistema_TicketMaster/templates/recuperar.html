@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña - TICKET-MASTER</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #00796b;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #00796b;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            color: green;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .signup-link a {
+            color: #00796b;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .signup-link a:hover {
+            color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>TICKET-MASTER</h1>
+        <h2>Recuperar Contraseña</h2>
+        <form action="/recuperar" method="post">
+            <!-- Campos movidos dentro del formulario -->
+
+            <input type="text" name="username2" placeholder="CURP" {% if verificado %}readonly value="{{ username }}"{% endif %} required>
+            
+            <button type="submit" name="verificar">Verificar identidad</button>
+
+            <!-- Campo de contraseña desbloqueado si verificado -->
+            <input type="password" name="nueva_contrasena2" placeholder="Nueva contraseña" {% if not verificado %}disabled{% endif %} required>
+
+            <button type="submit" name="cambiar" {% if not verificado %}disabled{% endif %}>Cambiar contraseña</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="{{ 'success-message' if category == 'success' else 'error-message' }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+        <div class="signup-link">
+            <p>¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+        </div>
+    </div>
+</body>
+</html>
