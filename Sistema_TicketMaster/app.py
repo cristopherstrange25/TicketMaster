@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
-from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
+from flask import Flask, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from extensions import db
@@ -68,9 +68,9 @@ from twilio.rest import Client
 
 
 # Configura tus credenciales de Twilio
-TWILIO_ACCOUNT_SID = '***oculto***'
-TWILIO_AUTH_TOKEN = '***oculto***'
-TWILIO_WHATSAPP_NUMBER = 'whatsapp:+14155238886'
+  cloud_name = "dcndmmy9m",
+  api_key = "***oculto***",
+  api_secret = "***oculto***"
 
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
@@ -105,43 +105,57 @@ class TestBase(TestCase):
 def recuperar():
     verificado = False
     username = ""
+    nombre = ""
+    correo = ""
 
     if request.method == 'POST':
         if 'verificar' in request.form:
-            # Obtener todos los campos del formulario
             username = request.form.get('username2')
+            nombre = request.form.get('nombre2')
+            correo = request.form.get('correo2')
 
-            # Validar que exista un usuario con todos los campos
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter_by(username=username, nombre=nombre, correo=correo).first()
 
             if user:
-                verificado = True
+                session['verificado'] = True
+                session['username'] = username
+                session['nombre'] = nombre
+                session['correo'] = correo
                 flash('Identidad verificada. Introduce tu nueva contraseña.', 'success')
+                return redirect(url_for('recuperar'))
             else:
-                flash('Datos incorrectos. Verifica tu información.', 'error')
+                flash('Datos incorrectos. Verifica tu CURP, nombre y correo.', 'error')
 
         elif 'cambiar' in request.form:
-            username = request.form.get('username2')
+            if not session.get('verificado'):
+                flash('Primero verifica tu identidad.', 'error')
+                return redirect(url_for('recuperar'))
+
+            username = session.get('username')
             nueva_contrasena = request.form.get('nueva_contrasena2')
 
-            # Validar formato de contraseña
             password_pattern = r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%&!])[A-Za-z\d@#$%&!]{8}$'
             if not re.match(password_pattern, nueva_contrasena):
                 flash('La contraseña debe tener 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos (@#$%&!)', 'error')
                 return redirect(url_for('recuperar'))
 
-            # Actualizar contraseña
             user = User.query.filter_by(username=username).first()
             if user:
                 user.password = generate_password_hash(nueva_contrasena)
                 db.session.commit()
+                session.clear()
                 flash('Contraseña actualizada correctamente. Inicia sesión.', 'success')
                 return redirect(url_for('login'))
             else:
                 flash('Error al actualizar la contraseña.', 'error')
 
-    return render_template('recuperar.html', verificado=verificado, username=username)
-    
+    verificado = session.get('verificado', False)
+    username = session.get('username', "")
+    nombre = session.get('nombre', "")
+    correo = session.get('correo', "")
+
+    return render_template('recuperar.html', verificado=verificado, username=username, nombre=nombre, correo=correo)
+
 def generate_qr_code(ticket_data, ticket_id):
     # Crear directorio si no existe
         qr_dir = os.path.join(os.getcwd(), 'static', 'qr_codes')
@@ -450,16 +464,19 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellidos = request.form['apellidos']
+        correo = request.form['correo']
         username = request.form['username']
         password = request.form['password']
-        
-        # Validación de nombre de usuario
+
+        # Validación CURP
         username_pattern = r'^[A-Za-z]{4}\d{6}[A-Za-z][A-Za-z]{2}[A-Za-z0-9]{3}[A-Z]{2}\d{2}$'
         if not re.match(username_pattern, username):
-            flash('''El nombre de usuario debe seguir el formato:
+            flash('''El CURP debe seguir el formato:
             4 letras + 6 números + 1 letra + 2 letras + 3 letras/números + 2 letras de estado + 2 números''', 'error')
             return redirect(url_for('register'))
-        
+
         # Validación de contraseña
         password_pattern = r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%&!])[A-Za-z\d@#$%&!]{8}$'
         if not re.match(password_pattern, password):
@@ -469,27 +486,32 @@ def register():
             - Al menos un número
             - Al menos un carácter especial (@, #, $, %, &, !)''', 'error')
             return redirect(url_for('register'))
-        
-        # Verificar si el usuario ya existe
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            flash('El nombre de usuario ya está registrado', 'error')
+
+        # Validar que username y correo no existan
+        if User.query.filter_by(username=username).first():
+            flash('El CURP ya está registrado', 'error')
             return redirect(url_for('register'))
-        
-        # Crear nuevo usuario CON CONTRASEÑA ENCRIPTADA
-        hashed_password = generate_password_hash(password)  # Generar hash seguro
+        if User.query.filter_by(correo=correo).first():
+            flash('El correo ya está registrado', 'error')
+            return redirect(url_for('register'))
+
+        # Crear usuario
+        hashed_password = generate_password_hash(password)
         new_user = User(
+            nombre=nombre,
+            apellidos=apellidos,
+            correo=correo,
             username=username,
-            password=hashed_password  # Almacenar el hash en lugar del texto plano
+            password=hashed_password
         )
-        
         db.session.add(new_user)
         db.session.commit()
-        
-        flash('Registro exitoso! Por favor inicia sesión', 'success')
+
+        flash('Registro exitoso. Por favor inicia sesión.', 'success')
         return redirect(url_for('login'))
-    
+
     return render_template('register.html')
+
 
 @app.route('/dashboard')
 @login_required

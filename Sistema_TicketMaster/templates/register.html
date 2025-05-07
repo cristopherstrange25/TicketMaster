@@ -107,6 +107,9 @@
         <h1>TICKET-MASTER</h1>
         <h2>Bienvenido... Regístrate</h2>
         <form id="registerForm" method="POST" action="/register">
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="text" name="apellidos" placeholder="Apellidos" required>
+            <input type="text" name="correo" placeholder="Correo electrónico" required>
             <input type="text" name="username" id="username" placeholder="Usuario" required>
             <input type="password" name="password" id="password" placeholder="Contraseña" required>
             <button type="submit">Registrarse</button>

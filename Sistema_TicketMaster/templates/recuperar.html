@@ -102,17 +102,41 @@
         <h1>TICKET-MASTER</h1>
         <h2>Recuperar Contraseña</h2>
         <form action="/recuperar" method="post">
-            <!-- Campos movidos dentro del formulario -->
-
-            <input type="text" name="username2" placeholder="CURP" {% if verificado %}readonly value="{{ username }}"{% endif %} required>
-            
-            <button type="submit" name="verificar">Verificar identidad</button>
-
-            <!-- Campo de contraseña desbloqueado si verificado -->
-            <input type="password" name="nueva_contrasena2" placeholder="Nueva contraseña" {% if not verificado %}disabled{% endif %} required>
-
-            <button type="submit" name="cambiar" {% if not verificado %}disabled{% endif %}>Cambiar contraseña</button>
+            <!-- CURP -->
+            <input type="text" name="username2" placeholder="CURP"
+                {% if verificado %}readonly value="{{ username }}"{% endif %}
+                required
+            >
+        
+            <!-- Nombre completo -->
+            <input type="text" name="nombre2" placeholder="Nombre completo"
+                {% if verificado %}readonly value="{{ nombre }}"{% endif %}
+                required
+            >
+        
+            <!-- Correo electrónico -->
+            <input type="text" name="correo2" placeholder="Correo electrónico"
+                {% if verificado %}readonly value="{{ correo }}"{% endif %}
+                required
+            >
+        
+            <!-- Botón verificar -->
+            {% if not verificado %}
+                <button type="submit" name="verificar">Verificar identidad</button>
+            {% endif %}
+        
+            <!-- Nueva contraseña -->
+            <input type="password" name="nueva_contrasena2" placeholder="Nueva contraseña"
+                {% if not verificado %}disabled{% endif %}
+                required
+            >
+        
+            <!-- Botón cambiar contraseña -->
+            <button type="submit" name="cambiar" {% if not verificado %}disabled{% endif %}>
+                Cambiar contraseña
+            </button>
         </form>
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
